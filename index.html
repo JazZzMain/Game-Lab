@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Game Lab</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#0a0f1f;
+color:white;
+}
+
+/* CENTRADO GLOBAL */
+.screen{
+display:none;
+min-height:100vh;
+width:100%;
+padding:20px;
+box-sizing:border-box;
+
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+}
+
+.active{
+display:flex;
+}
+
+.screen > *{
+max-width:800px;
+width:100%;
+}
+
+/* BOTONES */
+.world-btn{
+width:260px;height:80px;
+font-size:18px;
+border-radius:15px;
+margin:10px;
+position:relative;
+background:#00c3ff;
+border:none;
+cursor:pointer;
+}
+
+.lock{
+position:absolute;
+top:5px;
+right:10px;
+font-size:24px;
+color:red;
+}
+
+/* HUD */
+.hud{display:flex;justify-content:space-between;width:100%;}
+
+.bar{
+height:10px;background:#333;
+border-radius:10px;margin:10px 0;width:100%;
+}
+
+.fill{height:100%;background:#00ffcc;}
+
+/* MODAL */
+.modal{
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:#000c;
+display:none;
+justify-content:center;
+align-items:center;
+z-index:1000;
+}
+
+.modal-content{
+background:#111;padding:20px;border-radius:10px;
+}
+
+/* CONFETI */
+.confetti{
+position:fixed;width:10px;height:10px;
+top:0;animation:fall 2s linear;
+}
+@keyframes fall{to{transform:translateY(500px);}}
+
+/* GLITCH */
+#pistaBox{opacity:0;position:relative;font-weight:bold;}
+#pistaBox.visible{opacity:1;animation:glitch 0.5s infinite;}
+
+#pistaBox::before,#pistaBox::after{
+content:attr(data-text);
+position:absolute;left:0;
+}
+#pistaBox::before{color:#ff00ff;animation:glitchTop 0.5s infinite;}
+#pistaBox::after{color:#00ffff;animation:glitchBottom 0.5s infinite;}
+
+@keyframes glitch{
+0%{transform:skew(0);}
+50%{transform:skew(5deg);}
+100%{transform:skew(0);}
+}
+@keyframes glitchTop{50%{transform:translate(-2px,-2px);}}
+@keyframes glitchBottom{50%{transform:translate(2px,2px);}}
+</style>
+</head>
+
+<body>
+
+<!-- INICIO -->
+<div id="inicio" class="screen active">
+<h1>🎮 Game Lab</h1>
+<p><i>Es simple y eso gusta</i></p>
+
+<button id="btn0" class="world-btn" onclick="irLeccion(0)">Historia</button>
+
+<button id="btn1" class="world-btn" onclick="irLeccion(1)">
+Géneros <span id="lock1" class="lock">🔒</span>
+</button>
+
+<button id="btn2" class="world-btn" onclick="irLeccion(2)">
+Mecánicas <span id="lock2" class="lock">🔒</span>
+</button>
+</div>
+
+<!-- LECCION -->
+<div id="leccion" class="screen">
+<h2 id="tituloMundo"></h2>
+<p id="descMundo"></p>
+<button onclick="iniciarNivel()">Jugar</button>
+<button onclick="volverInicio()">Volver</button>
+</div>
+
+<!-- JUEGO -->
+<div id="juego" class="screen">
+<div class="hud">
+<div>Puntaje: <span id="puntaje"></span></div>
+<div>Vidas: <span id="vidas"></span></div>
+<div>Tiempo: <span id="tiempo"></span></div>
+</div>
+
+<div class="bar"><div id="progreso" class="fill"></div></div>
+
+<h3 id="pregunta"></h3>
+
+<p id="pistaBox"><b>Pista:</b> <span id="pista"></span></p>
+
+<div id="opciones"></div>
+</div>
+
+<!-- MODAL -->
+<div id="modal" class="modal">
+<div class="modal-content">
+<h2 id="resultado"></h2>
+<p id="explicacion"></p>
+<button onclick="siguiente()">Continuar</button>
+</div>
+</div>
+
+<script>
+let progreso=[true,false,false];
+
+/* MUNDOS COMPLETOS */
+let mundos=[
+{
+nombre:"Historia",
+desc:"Evolución de los videojuegos",
+niveles:[
+{q:"¿Qué videojuego marcó el inicio comercial de la industria arcade con una mecánica simple de simulación deportiva?",hint:"Pong",
+op:["Pong, un simulador de tenis de mesa electrónico","Fortnite, un battle royale moderno","Minecraft, un sandbox creativo"],c:0,exp:"Pong fue uno de los primeros éxitos comerciales."},
+{q:"¿Qué limitación principal tenían los videojuegos en los años 70 y 80 debido al hardware?",hint:"potencia",
+op:["Baja capacidad de procesamiento y memoria","Exceso de conectividad en red","Sobrecarga de controles avanzados"],c:0,exp:"El hardware era muy limitado."},
+{q:"¿Qué consola revitalizó la industria tras la crisis de 1983?",hint:"NES",
+op:["Nintendo Entertainment System","PlayStation 5","Xbox Series X"],c:0,exp:"Nintendo reactivó el mercado."},
+{q:"¿Qué avance permitió la transición a videojuegos en 3D?",hint:"GPU",
+op:["Procesadores gráficos especializados","Discos compactos únicamente","Reducción de píxeles"],c:0,exp:"Las GPU hicieron posible el 3D."},
+{q:"¿Qué impacto tuvo internet en los videojuegos?",hint:"online",
+op:["Multijugador global en tiempo real","Eliminación de gráficos","Reducción de contenido"],c:0,exp:"Permitió jugar con personas en todo el mundo."},
+{q:"¿Qué plataforma impulsó la masificación del gaming en el siglo XXI?",hint:"móvil",
+op:["Dispositivos móviles accesibles","Consolas exclusivas","Arcades físicos"],c:0,exp:"Los móviles expandieron el acceso."}
+]
+},
+{
+nombre:"Géneros",
+desc:"Clasificación de videojuegos",
+niveles:[
+{q:"¿Qué característica define a un FPS moderno?",hint:"disparo",
+op:["Uso de armas desde perspectiva en primera persona","Construcción de mundos abiertos","Resolución de acertijos"],c:0,exp:"FPS significa First Person Shooter."},
+{q:"¿Qué define a un RPG?",hint:"rol",
+op:["Desarrollo progresivo de personaje y narrativa","Carreras competitivas","Simulación deportiva"],c:0,exp:"RPG = Role Playing Game."},
+{q:"¿Qué es un sandbox?",hint:"libertad",
+op:["Exploración y creación sin objetivos estrictos","Historia lineal fija","Combate obligatorio"],c:0,exp:"Permite libertad total."},
+{q:"¿Qué define un MOBA?",hint:"equipo",
+op:["Estrategia en equipo en mapas definidos","Juego individual","Carreras rápidas"],c:0,exp:"Trabajo en equipo."},
+{q:"¿Qué caracteriza a los juegos puzzle?",hint:"lógica",
+op:["Resolución de problemas y acertijos","Acción constante","Combate"],c:0,exp:"Se basan en lógica."},
+{q:"¿Qué define la simulación?",hint:"realismo",
+op:["Imitar sistemas reales con precisión","Crear fantasía extrema","Eliminar reglas"],c:0,exp:"Busca realismo."}
+]
+},
+{
+nombre:"Mecánicas",
+desc:"Funcionamiento interno",
+niveles:[
+{q:"¿Qué representan las vidas en un videojuego?",hint:"intentos",
+op:["Cantidad de oportunidades antes de perder","Tiempo restante","Nivel alcanzado"],c:0,exp:"Intentos del jugador."},
+{q:"¿Qué indica una barra de progreso?",hint:"avance",
+op:["Estado de avance dentro del nivel","Decoración visual","Nivel de sonido"],c:0,exp:"Mide progreso."},
+{q:"¿Qué significa subir de nivel?",hint:"nivel",
+op:["Mejorar habilidades del personaje","Reiniciar partida","Perder progreso"],c:0,exp:"Progresión."},
+{q:"¿Qué es un checkpoint?",hint:"guardar",
+op:["Punto de guardado intermedio","Inicio del juego","Final del juego"],c:0,exp:"Permite continuar."},
+{q:"¿Qué es cooldown?",hint:"espera",
+op:["Tiempo de recarga de habilidades","Fin del juego","Velocidad extra"],c:0,exp:"Tiempo de espera."},
+{q:"¿Qué es el HUD?",hint:"interfaz",
+op:["Interfaz gráfica informativa","Historia narrativa","Sistema de audio"],c:0,exp:"Interfaz visual."}
+]
+}
+];
+
+let mundoActual=0,nivelActual=0,puntaje=0,vidas=3,tiempo=20,timer;
+
+/* BLOQUEO */
+function actualizarBloqueo(){
+document.getElementById("lock1").style.display = progreso[1] ? "none" : "block";
+document.getElementById("lock2").style.display = progreso[2] ? "none" : "block";
+}
+
+/* NAV */
+function mostrar(id){
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+if(id==="inicio") actualizarBloqueo();
+}
+
+function volverInicio(){mostrar("inicio");}
+
+function irLeccion(i){
+if(!progreso[i]){
+alert("Debes completar el mundo anterior");
+return;
+}
+mundoActual=i;
+document.getElementById("tituloMundo").innerText=mundos[i].nombre;
+document.getElementById("descMundo").innerText=mundos[i].desc;
+mostrar("leccion");
+}
+
+function iniciarNivel(){
+nivelActual=0;puntaje=0;vidas=3;
+mostrar("juego");cargarNivel();
+}
+
+/* JUEGO */
+function cargarNivel(){
+let n=mundos[mundoActual].niveles[nivelActual];
+
+document.getElementById("pregunta").innerText=n.q;
+document.getElementById("pista").innerText=n.hint;
+
+let box=document.getElementById("pistaBox");
+box.setAttribute("data-text","Pista: "+n.hint);
+box.classList.remove("visible");
+
+let html="";
+n.op.forEach((o,i)=>html+=`<button onclick="responder(${i})">${o}</button>`);
+document.getElementById("opciones").innerHTML=html;
+
+tiempo=20;
+document.getElementById("tiempo").innerText=tiempo;
+
+clearInterval(timer);
+timer=setInterval(()=>{
+tiempo--;
+document.getElementById("tiempo").innerText=tiempo;
+
+if(tiempo===10) box.classList.add("visible");
+
+if(tiempo<=0){
+vidas--;
+clearInterval(timer);
+mostrarResultado(false,"Tiempo agotado");
+}
+},1000);
+}
+
+function responder(i){
+clearInterval(timer);
+let n=mundos[mundoActual].niveles[nivelActual];
+
+if(i===n.c){
+puntaje+=10;
+confeti();
+mostrarResultado(true,n.exp);
+}else{
+vidas--;
+mostrarResultado(false,n.exp);
+}
+}
+
+function mostrarResultado(ok,texto){
+document.getElementById("resultado").innerText=ok?"Correcto":"Incorrecto";
+document.getElementById("explicacion").innerText=texto;
+document.getElementById("modal").style.display="flex";
+}
+
+function siguiente(){
+document.getElementById("modal").style.display="none";
+nivelActual++;
+
+if(nivelActual>=mundos[mundoActual].niveles.length){
+if(mundoActual+1<progreso.length){
+progreso[mundoActual+1]=true;
+}
+volverInicio();
+}else{
+cargarNivel();
+}
+}
+
+function confeti(){
+for(let i=0;i<20;i++){
+let c=document.createElement("div");
+c.className="confetti";
+c.style.left=Math.random()*100+"%";
+c.style.background=["red","yellow","blue","green"][Math.floor(Math.random()*4)];
+document.body.appendChild(c);
+setTimeout(()=>c.remove(),2000);
+}
+}
+
+/* INIT */
+actualizarBloqueo();
+</script>
+
+</body>
+</html>
