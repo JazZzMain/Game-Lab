@@ -481,9 +481,221 @@ body::after{
   background:repeating-linear-gradient(90deg,var(--neon-cyan) 0,var(--neon-cyan) 6px,transparent 6px,transparent 10px);
   opacity:0.4;margin:32px auto;max-width:300px;
 }
+
+/* ===== PORTADA ===== */
+#portada{
+  position:fixed;inset:0;z-index:5000;
+  display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  overflow:hidden;
+  background:var(--bg);
+  transition:opacity 0.9s ease, transform 0.9s ease;
+}
+#portada.saliendo{
+  opacity:0;
+  transform:scale(1.06);
+  pointer-events:none;
+}
+
+/* SPRITES FLOTANTES */
+.sprites-bg{
+  position:absolute;inset:0;overflow:hidden;
+  pointer-events:none;
+}
+.sprite{
+  position:absolute;
+  font-size:40px;
+  opacity:0.18;
+  animation:floatSprite linear infinite;
+  user-select:none;
+  filter:drop-shadow(0 0 8px var(--neon-cyan));
+}
+@keyframes floatSprite{
+  0%  {transform:translateY(110vh) rotate(0deg);}
+  100%{transform:translateY(-20vh) rotate(360deg);}
+}
+
+/* CONTENIDO PORTADA */
+.portada-content{
+  position:relative;z-index:2;
+  display:flex;flex-direction:column;
+  align-items:center;text-align:center;
+  padding:24px 16px;
+  width:100%;max-width:520px;
+  animation:fadeInUp 0.8s ease both;
+}
+@keyframes fadeInUp{
+  from{opacity:0;transform:translateY(30px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+.portada-logo{
+  font-family:'Press Start 2P',monospace;
+  font-size:clamp(28px,7vw,56px);
+  color:var(--neon-cyan);
+  text-shadow:0 0 15px var(--neon-cyan),0 0 40px var(--neon-cyan),0 0 80px rgba(0,255,245,0.4);
+  letter-spacing:6px;
+  margin-bottom:6px;
+  animation:pulse-logo 3s ease-in-out infinite;
+}
+
+.portada-sub{
+  font-family:'Press Start 2P',monospace;
+  font-size:9px;
+  color:var(--neon-pink);
+  letter-spacing:3px;
+  text-shadow:0 0 8px var(--neon-pink);
+  margin-bottom:48px;
+  animation:blink 1.5s step-end infinite;
+}
+
+.portada-card{
+  width:100%;
+  border:2px solid var(--neon-cyan);
+  border-radius:8px;
+  background:rgba(13,10,31,0.85);
+  backdrop-filter:blur(8px);
+  padding:32px 28px;
+  position:relative;
+  box-shadow:0 0 30px rgba(0,255,245,0.1), inset 0 0 30px rgba(0,255,245,0.03);
+}
+
+.portada-label{
+  font-family:'Press Start 2P',monospace;
+  font-size:9px;
+  color:var(--muted);
+  letter-spacing:2px;
+  text-align:left;
+  margin-bottom:10px;
+}
+
+.portada-input{
+  width:100%;
+  background:var(--panel2);
+  border:2px solid var(--border);
+  border-radius:4px;
+  color:var(--neon-cyan);
+  font-family:'Press Start 2P',monospace;
+  font-size:13px;
+  padding:14px 16px;
+  letter-spacing:2px;
+  outline:none;
+  transition:border-color 0.2s, box-shadow 0.2s;
+  margin-bottom:20px;
+}
+.portada-input::placeholder{color:var(--border);font-size:10px;}
+.portada-input:focus{
+  border-color:var(--neon-cyan);
+  box-shadow:0 0 16px rgba(0,255,245,0.2);
+}
+
+.portada-btn{
+  width:100%;
+  font-family:'Press Start 2P',monospace;
+  font-size:12px;
+  padding:16px;
+  background:transparent;
+  border:2px solid var(--neon-green);
+  color:var(--neon-green);
+  border-radius:4px;
+  cursor:pointer;
+  letter-spacing:2px;
+  text-shadow:0 0 8px var(--neon-green);
+  box-shadow:0 0 15px rgba(0,255,136,0.2);
+  transition:all 0.2s;
+  position:relative;overflow:hidden;
+}
+.portada-btn::before{
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(0,255,136,0.15),transparent);
+  transition:left 0.4s;
+}
+.portada-btn:hover{
+  background:rgba(0,255,136,0.08);
+  box-shadow:0 0 30px rgba(0,255,136,0.4);
+  transform:translateY(-2px);
+}
+.portada-btn:hover::before{left:100%;}
+.portada-btn:active{transform:scale(0.98);}
+.portada-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+
+.portada-error{
+  font-family:'Press Start 2P',monospace;
+  font-size:8px;color:#ff3333;
+  text-shadow:0 0 6px #ff3333;
+  margin-top:10px;
+  min-height:16px;
+  animation:blink 0.5s step-end 3;
+}
+
+.portada-footer{
+  position:absolute;bottom:24px;left:0;right:0;
+  text-align:center;
+  font-family:'Press Start 2P',monospace;
+  font-size:8px;
+  color:var(--muted);
+  letter-spacing:2px;
+  opacity:0.7;
+}
+
+/* SCANLINE sobre portada */
+#portada::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(
+    0deg,transparent,transparent 2px,
+    rgba(0,0,0,0.12) 2px,rgba(0,0,0,0.12) 4px
+  );
+  pointer-events:none;z-index:3;
+}
+
+/* TRANSICION FLASH */
+#flash-overlay{
+  position:fixed;inset:0;z-index:9000;
+  background:var(--neon-cyan);
+  opacity:0;pointer-events:none;
+  transition:opacity 0.15s ease;
+}
+#flash-overlay.flash-in{opacity:0.35;}
 </style>
 </head>
 <body>
+
+<!-- FLASH OVERLAY -->
+<div id="flash-overlay"></div>
+
+<!-- PORTADA -->
+<div id="portada">
+  <div class="sprites-bg" id="spritesBg"></div>
+
+  <div class="portada-content">
+    <div class="portada-logo">GAME LAB</div>
+    <div class="portada-sub">▶ EL CONOCIMIENTO ES EL PODER ◀</div>
+
+    <div class="portada-card">
+      <div class="corner corner-tl"></div>
+      <div class="corner corner-tr"></div>
+      <div class="corner corner-bl"></div>
+      <div class="corner corner-br"></div>
+
+      <div class="portada-label">▶ INGRESA TU NOMBRE DE JUGADOR</div>
+      <input
+        id="nombreInput"
+        class="portada-input"
+        type="text"
+        maxlength="16"
+        placeholder="TU NOMBRE AQUÍ"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button class="portada-btn" id="accederBtn" onclick="acceder()">
+        ▶ &nbsp; ACCEDER AL JUEGO
+      </button>
+      <div class="portada-error" id="portadaError"></div>
+    </div>
+  </div>
+
+  <div class="portada-footer">By: Juan Yacomelo</div>
+</div>
 
 <!-- INICIO -->
 <div id="inicio" class="screen active">
@@ -963,11 +1175,63 @@ function lanzarConfeti(){
 }
 
 actualizarBloqueo();
+
+/* ===== PORTADA JS ===== */
+(function(){
+  const SPRITES=[
+    "🕹️","🎮","👾","🏆","⚔️","🛡️","🔫","💣","🚀","🐉",
+    "🦄","💎","🗡️","🎲","🃏","👑","⚡","🌟","🔥","🧩",
+    "🏅","🎯","💀","🤖","🦊","🐢","🌙","🔮","💾","📀"
+  ];
+
+  const bg=document.getElementById("spritesBg");
+  for(let i=0;i<24;i++){
+    const s=document.createElement("div");
+    s.className="sprite";
+    s.textContent=SPRITES[Math.floor(Math.random()*SPRITES.length)];
+    const size=28+Math.random()*38;
+    const dur=9+Math.random()*18;
+    const delay=-(Math.random()*dur);
+    const left=Math.random()*100;
+    const col=Math.random()>0.5?"var(--neon-pink)":"var(--neon-cyan)";
+    s.style.cssText=`left:${left}%;font-size:${size}px;animation-duration:${dur}s;animation-delay:${delay}s;filter:drop-shadow(0 0 7px ${col});opacity:${0.09+Math.random()*0.14};`;
+    bg.appendChild(s);
+  }
+
+  const input=document.getElementById("nombreInput");
+  const errorEl=document.getElementById("portadaError");
+
+  input.addEventListener("keydown",e=>{if(e.key==="Enter") acceder();});
+  input.addEventListener("input",()=>{
+    errorEl.textContent="";
+    input.value=input.value.toUpperCase();
+  });
+
+  window.acceder=function(){
+    const nombre=input.value.trim();
+    if(!nombre){
+      errorEl.textContent="⚠ DEBES INGRESAR UN NOMBRE";
+      input.style.borderColor="#ff3333";
+      input.style.boxShadow="0 0 14px rgba(255,51,51,0.35)";
+      setTimeout(()=>{input.style.borderColor="";input.style.boxShadow="";},1200);
+      return;
+    }
+    window._playerName=nombre;
+    const flash=document.getElementById("flash-overlay");
+    const portada=document.getElementById("portada");
+    flash.classList.add("flash-in");
+    setTimeout(()=>flash.classList.remove("flash-in"),180);
+    setTimeout(()=>{
+      portada.classList.add("saliendo");
+      setTimeout(()=>{portada.style.display="none";},950);
+    },120);
+  };
+})();
 </script>
 
 <script
   src='https://cdn.jotfor.ms/agent/embedjs/019e038d7989770289b91e5819339608272d/embed.js?autoOpenChatIn=1'>
 </script>
-  
+
 </body>
 </html>
