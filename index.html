@@ -530,6 +530,28 @@ body::after{
         <span id="badge2" class="world-badge badge-locked">🔒 LOCK</span>
       </div>
     </button>
+
+    <button id="btn3" class="world-btn locked" onclick="irLeccion(3)">
+      <div class="world-btn-inner">
+        <span class="world-icon">🏆</span>
+        <div class="world-info">
+          <span class="world-name">WORLD 4 — ESPORTS</span>
+          <span class="world-desc">Competencia y cultura gamer</span>
+        </div>
+        <span id="badge3" class="world-badge badge-locked">🔒 LOCK</span>
+      </div>
+    </button>
+
+    <button id="btn4" class="world-btn locked" onclick="irLeccion(4)">
+      <div class="world-btn-inner">
+        <span class="world-icon">🖥️</span>
+        <div class="world-info">
+          <span class="world-name">WORLD 5 — DESARROLLO</span>
+          <span class="world-desc">Creación de videojuegos</span>
+        </div>
+        <span id="badge4" class="world-badge badge-locked">🔒 LOCK</span>
+      </div>
+    </button>
   </div>
 
   <div class="pixel-div"></div>
@@ -539,6 +561,8 @@ body::after{
     <div class="hs-row"><span>MUNDO 1</span><span id="hs0" style="color:var(--neon-cyan)">---</span></div>
     <div class="hs-row"><span>MUNDO 2</span><span id="hs1" style="color:var(--neon-cyan)">---</span></div>
     <div class="hs-row"><span>MUNDO 3</span><span id="hs2" style="color:var(--neon-cyan)">---</span></div>
+    <div class="hs-row"><span>MUNDO 4</span><span id="hs3" style="color:var(--neon-cyan)">---</span></div>
+    <div class="hs-row"><span>MUNDO 5</span><span id="hs4" style="color:var(--neon-cyan)">---</span></div>
   </div>
 </div>
 
@@ -635,8 +659,8 @@ body::after{
 </div>
 
 <script>
-let progreso=[true,false,false];
-let highscores=[null,null,null];
+let progreso=[true,false,false,false,false];
+let highscores=[null,null,null,null,null];
 
 let mundos=[
   {
@@ -674,6 +698,30 @@ let mundos=[
       {q:"¿Qué es cooldown?",hint:"espera",op:["Tiempo de recarga de habilidades","Fin del juego","Velocidad extra"],c:0,exp:"El cooldown es el tiempo de espera antes de usar una habilidad de nuevo."},
       {q:"¿Qué es el HUD?",hint:"interfaz",op:["Interfaz gráfica informativa","Historia narrativa","Sistema de audio"],c:0,exp:"HUD = Heads-Up Display. Es la interfaz visual que muestra info al jugador."}
     ]
+  },
+  {
+    nombre:"Esports",
+    desc:"Competencia y cultura gamer",
+    niveles:[
+      {q:"¿Qué son los esports?",hint:"competencia",op:["Competencias profesionales de videojuegos organizadas","Torneos de deportes tradicionales transmitidos en internet","Juegos casuales jugados en línea sin premio"],c:0,exp:"Los esports son competencias profesionales de videojuegos con equipos, ligas y premios millonarios."},
+      {q:"¿Qué es un 'streamer' en la cultura gamer?",hint:"transmisión",op:["Persona que transmite en vivo sus partidas por internet","Jugador profesional de torneos","Desarrollador de videojuegos independiente"],c:0,exp:"Un streamer transmite sus sesiones de juego en directo, normalmente en plataformas como Twitch o YouTube."},
+      {q:"¿Qué significa 'GG' en la jerga gamer?",hint:"partida",op:["Good Game, reconocimiento de una buena partida","Get Going, señal de inicio del juego","Game Glitch, reporte de un error"],c:0,exp:"GG significa 'Good Game', una expresión de respeto hacia los rivales al terminar una partida."},
+      {q:"¿Qué es el 'meta' en un juego competitivo?",hint:"estrategia",op:["La estrategia o combinación de personajes más efectiva del momento","El mapa principal de un videojuego","El nivel de dificultad máximo disponible"],c:0,exp:"El 'meta' (Most Effective Tactic Available) es la estrategia dominante usada por jugadores competitivos en un momento dado."},
+      {q:"¿Qué es un 'lag' en el gaming online?",hint:"red",op:["Retraso entre la acción del jugador y la respuesta del servidor","Un tipo especial de personaje rápido","Una habilidad que congela enemigos"],c:0,exp:"El lag es el retardo en la comunicación entre el cliente y el servidor, causando desincronización en el juego online."},
+      {q:"¿Qué es un 'clutch' en esports?",hint:"presión",op:["Jugar en desventaja y conseguir la victoria de forma heroica","Una técnica de movimiento rápido en shooters","Un tipo de torneos de eliminación directa"],c:0,exp:"Un clutch es cuando un jugador solo logra ganar una ronda o partida estando en clara desventaja numérica o de recursos."}
+    ]
+  },
+  {
+    nombre:"Desarrollo",
+    desc:"Creación de videojuegos",
+    niveles:[
+      {q:"¿Qué es un 'game engine' o motor de videojuego?",hint:"motor",op:["Software que provee herramientas para crear videojuegos","Un componente de hardware para acelerar gráficos","Un tipo de controlador de alta velocidad"],c:0,exp:"Un game engine como Unity o Unreal Engine es un framework que facilita la creación de juegos con física, gráficos, audio y más."},
+      {q:"¿Qué rol cumple un 'game designer'?",hint:"diseño",op:["Define las reglas, mecánicas y experiencia del juego","Programa el código fuente del juego","Compone la banda sonora del videojuego"],c:0,exp:"El game designer es el responsable de diseñar la experiencia de juego: niveles, reglas, mecánicas y progresión."},
+      {q:"¿Qué es el 'pixel art' en el contexto de los videojuegos?",hint:"píxeles",op:["Estilo gráfico creado manipulando píxeles individualmente","Técnica de renderizado 3D de alta fidelidad","Formato de compresión de texturas en consolas modernas"],c:0,exp:"El pixel art es una forma de arte digital donde las imágenes se crean a nivel de píxel, muy asociada a juegos retro de 8 y 16 bits."},
+      {q:"¿Qué significa 'bug' en el desarrollo de videojuegos?",hint:"error",op:["Un error o falla en el código que causa comportamientos inesperados","Una actualización de contenido adicional","Un modo de juego secreto desbloqueado"],c:0,exp:"Un bug es un defecto en el código del juego que provoca comportamientos no deseados, como caídas del juego o físicas erráticas."},
+      {q:"¿Qué es un juego 'indie'?",hint:"independiente",op:["Videojuego creado sin el respaldo financiero de una gran editora","Un juego exclusivo de una consola específica","Un videojuego diseñado únicamente para móviles"],c:0,exp:"Un juego indie es desarrollado de forma independiente, sin financiamiento de grandes publishers, destacando por su creatividad y originalidad."},
+      {q:"¿Qué es el 'alpha testing' en el desarrollo de un juego?",hint:"prueba",op:["Fase temprana de pruebas internas para detectar fallos","Lanzamiento final del juego al público general","Proceso de diseño del arte conceptual del juego"],c:0,exp:"El alpha testing es una fase de pruebas realizadas por el propio equipo de desarrollo para encontrar bugs antes de mostrar el juego al exterior."}
+    ]
   }
 ];
 
@@ -681,7 +729,7 @@ let mundoActual=0,nivelActual=0,puntajeActual=0,vidas=3,tiempo=20,timer;
 const letras=["A","B","C"];
 
 function actualizarBloqueo(){
-  for(let i=0;i<3;i++){
+  for(let i=0;i<5;i++){
     const btn=document.getElementById("btn"+i);
     const badge=document.getElementById("badge"+i);
     if(progreso[i]){
@@ -920,6 +968,6 @@ actualizarBloqueo();
 <script
   src='https://cdn.jotfor.ms/agent/embedjs/019e038d7989770289b91e5819339608272d/embed.js?autoOpenChatIn=1'>
 </script>
- 
+  
 </body>
 </html>
