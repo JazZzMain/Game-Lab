@@ -3,344 +3,923 @@
 <head>
 <meta charset="UTF-8">
 <title>Game Lab</title>
-
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
+:root{
+  --neon-cyan:#00fff5;
+  --neon-pink:#ff00aa;
+  --neon-yellow:#ffe600;
+  --neon-green:#00ff88;
+  --neon-orange:#ff6b00;
+  --bg:#03020a;
+  --bg2:#080614;
+  --panel:#0d0a1f;
+  --panel2:#130f28;
+  --border:#2a1f5a;
+  --text:#e8e0ff;
+  --muted:#7a6fa0;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+html,body{height:100%;overflow-x:hidden;}
+
 body{
-margin:0;
-font-family:Arial;
-background:#0a0f1f;
-color:white;
+  font-family:'Orbitron',monospace;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  position:relative;
 }
 
-/* CENTRADO GLOBAL */
+/* SCANLINES CRT */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,transparent 2px,
+    rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px
+  );
+  pointer-events:none;z-index:9999;
+}
+
+/* GRID BACKGROUND */
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(0,255,245,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,255,245,0.04) 1px,transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;z-index:0;
+}
+
+/* SCREENS */
 .screen{
-display:none;
-min-height:100vh;
-width:100%;
-padding:20px;
-box-sizing:border-box;
+  display:none;min-height:100vh;width:100%;
+  padding:24px 16px;
+  flex-direction:column;
+  justify-content:center;align-items:center;
+  text-align:center;position:relative;z-index:1;
+}
+.active{display:flex;}
+.screen > *{max-width:760px;width:100%;}
 
-flex-direction:column;
-justify-content:center;
-align-items:center;
-text-align:center;
+/* ===== INICIO ===== */
+.logo-wrap{margin-bottom:8px;}
+
+.logo{
+  font-family:'Press Start 2P',monospace;
+  font-size:clamp(22px,5vw,42px);
+  color:var(--neon-cyan);
+  text-shadow:0 0 10px var(--neon-cyan),0 0 30px var(--neon-cyan),0 0 60px rgba(0,255,245,0.4);
+  letter-spacing:4px;
+  animation:pulse-logo 3s ease-in-out infinite;
 }
 
-.active{
-display:flex;
+@keyframes pulse-logo{
+  0%,100%{text-shadow:0 0 10px var(--neon-cyan),0 0 30px var(--neon-cyan),0 0 60px rgba(0,255,245,0.3);}
+  50%{text-shadow:0 0 20px var(--neon-cyan),0 0 50px var(--neon-cyan),0 0 90px rgba(0,255,245,0.6);}
 }
 
-.screen > *{
-max-width:800px;
-width:100%;
+.tagline{
+  font-family:'Press Start 2P',monospace;
+  font-size:9px;color:var(--neon-pink);
+  letter-spacing:2px;margin-bottom:40px;
+  text-shadow:0 0 8px var(--neon-pink);
+  animation:blink 1.5s step-end infinite;
+}
+@keyframes blink{50%{opacity:0;}}
+
+.insert-coin{
+  font-family:'Press Start 2P',monospace;
+  font-size:10px;color:var(--neon-yellow);
+  letter-spacing:2px;margin-bottom:32px;
+  text-shadow:0 0 8px var(--neon-yellow);
+  animation:blink 1s step-end infinite;
 }
 
-/* BOTONES */
+/* WORLD BUTTONS */
+.worlds-grid{
+  display:flex;flex-direction:column;gap:16px;align-items:center;
+  width:100%;max-width:520px;margin:0 auto;
+}
+
 .world-btn{
-width:260px;height:80px;
-font-size:18px;
-border-radius:15px;
-margin:10px;
-position:relative;
-background:#00c3ff;
-border:none;
-cursor:pointer;
+  width:100%;padding:0;
+  background:transparent;border:none;cursor:pointer;
+  position:relative;
 }
 
-.lock{
-position:absolute;
-top:5px;
-right:10px;
-font-size:24px;
-color:red;
+.world-btn-inner{
+  display:flex;align-items:center;gap:16px;
+  padding:18px 24px;
+  border:2px solid var(--neon-cyan);
+  border-radius:4px;
+  background:var(--panel);
+  position:relative;overflow:hidden;
+  transition:all 0.2s;
 }
 
-/* HUD */
-.hud{display:flex;justify-content:space-between;width:100%;}
+.world-btn-inner::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(0,255,245,0.08),transparent);
+  transform:translateX(-100%);
+  transition:transform 0.5s;
+}
+
+.world-btn:hover .world-btn-inner{
+  border-color:var(--neon-pink);
+  background:var(--panel2);
+  box-shadow:0 0 20px rgba(255,0,170,0.3),inset 0 0 20px rgba(255,0,170,0.05);
+  transform:translateX(4px);
+}
+.world-btn:hover .world-btn-inner::before{transform:translateX(100%);}
+
+.world-btn.locked .world-btn-inner{
+  border-color:var(--border);
+  opacity:0.5;cursor:not-allowed;
+}
+.world-btn.locked:hover .world-btn-inner{transform:none;box-shadow:none;}
+
+.world-icon{
+  font-size:28px;width:44px;flex-shrink:0;
+}
+
+.world-info{text-align:left;flex:1;}
+
+.world-name{
+  font-family:'Press Start 2P',monospace;
+  font-size:12px;color:var(--neon-cyan);
+  text-shadow:0 0 8px var(--neon-cyan);
+  display:block;margin-bottom:6px;
+}
+
+.world-btn:hover .world-name{color:var(--neon-pink);text-shadow:0 0 8px var(--neon-pink);}
+
+.world-desc{font-size:11px;color:var(--muted);letter-spacing:1px;}
+
+.world-badge{
+  font-family:'Press Start 2P',monospace;
+  font-size:8px;padding:4px 8px;
+  border-radius:2px;flex-shrink:0;
+}
+.badge-locked{background:rgba(42,31,90,0.8);color:var(--muted);border:1px solid var(--border);}
+.badge-open{background:rgba(0,255,136,0.1);color:var(--neon-green);border:1px solid var(--neon-green);}
+.badge-done{background:rgba(255,230,0,0.1);color:var(--neon-yellow);border:1px solid var(--neon-yellow);}
+
+/* CORNER DECORATIONS */
+.corner{position:absolute;width:12px;height:12px;}
+.corner-tl{top:0;left:0;border-top:2px solid var(--neon-cyan);border-left:2px solid var(--neon-cyan);}
+.corner-tr{top:0;right:0;border-top:2px solid var(--neon-cyan);border-right:2px solid var(--neon-cyan);}
+.corner-bl{bottom:0;left:0;border-bottom:2px solid var(--neon-cyan);border-left:2px solid var(--neon-cyan);}
+.corner-br{bottom:0;right:0;border-bottom:2px solid var(--neon-cyan);border-right:2px solid var(--neon-cyan);}
+
+/* HIGH SCORES PANEL */
+.highscore-panel{
+  margin-top:32px;
+  border:1px solid var(--border);
+  padding:12px 20px;
+  border-radius:4px;
+  background:var(--panel);
+  max-width:300px;margin-left:auto;margin-right:auto;margin-top:32px;
+}
+.hs-title{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--neon-yellow);text-shadow:0 0 6px var(--neon-yellow);margin-bottom:10px;}
+.hs-row{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);padding:3px 0;}
+
+/* ===== LECCION ===== */
+.lec-header{margin-bottom:32px;}
+
+.lec-world-tag{
+  font-family:'Press Start 2P',monospace;
+  font-size:8px;color:var(--neon-pink);
+  letter-spacing:2px;margin-bottom:12px;
+  text-shadow:0 0 8px var(--neon-pink);
+}
+
+.lec-title{
+  font-family:'Press Start 2P',monospace;
+  font-size:clamp(16px,3vw,26px);
+  color:var(--neon-cyan);
+  text-shadow:0 0 15px var(--neon-cyan);
+  margin-bottom:16px;
+}
+
+.lec-desc{
+  font-size:13px;color:var(--muted);
+  letter-spacing:1px;line-height:1.8;
+  max-width:480px;margin:0 auto 32px;
+}
+
+.lec-card{
+  border:1px solid var(--border);
+  background:var(--panel);
+  border-radius:6px;
+  padding:24px;
+  margin-bottom:24px;
+  position:relative;
+}
+
+.stat-row{
+  display:flex;justify-content:center;gap:32px;flex-wrap:wrap;margin-bottom:24px;
+}
+
+.stat-item{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.stat-val{font-family:'Press Start 2P',monospace;font-size:18px;color:var(--neon-yellow);}
+.stat-lbl{font-size:9px;color:var(--muted);letter-spacing:1px;}
+
+.btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+
+.btn-primary{
+  font-family:'Press Start 2P',monospace;
+  font-size:11px;padding:14px 28px;
+  background:transparent;
+  border:2px solid var(--neon-green);
+  color:var(--neon-green);
+  cursor:pointer;letter-spacing:1px;
+  border-radius:4px;
+  text-shadow:0 0 8px var(--neon-green);
+  box-shadow:0 0 15px rgba(0,255,136,0.2);
+  transition:all 0.2s;position:relative;overflow:hidden;
+}
+.btn-primary:hover{
+  background:rgba(0,255,136,0.1);
+  box-shadow:0 0 30px rgba(0,255,136,0.4);
+  transform:translateY(-2px);
+}
+.btn-primary:active{transform:translateY(0) scale(0.98);}
+
+.btn-secondary{
+  font-family:'Press Start 2P',monospace;
+  font-size:11px;padding:14px 24px;
+  background:transparent;
+  border:2px solid var(--border);
+  color:var(--muted);
+  cursor:pointer;letter-spacing:1px;
+  border-radius:4px;
+  transition:all 0.2s;
+}
+.btn-secondary:hover{border-color:var(--muted);color:var(--text);}
+
+/* ===== JUEGO ===== */
+.hud{
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:8px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:10px 16px;
+  margin-bottom:16px;
+}
+
+.hud-item{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+}
+.hud-label{font-size:8px;color:var(--muted);font-family:'Press Start 2P',monospace;letter-spacing:1px;}
+.hud-val{font-family:'Press Start 2P',monospace;font-size:14px;}
+.hud-val.cyan{color:var(--neon-cyan);text-shadow:0 0 8px var(--neon-cyan);}
+.hud-val.pink{color:var(--neon-pink);text-shadow:0 0 8px var(--neon-pink);}
+.hud-val.yellow{color:var(--neon-yellow);text-shadow:0 0 8px var(--neon-yellow);}
+
+/* TIMER DANGER */
+.hud-val.danger{color:#ff3333;text-shadow:0 0 12px #ff3333;animation:shake 0.3s infinite;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-2px);}75%{transform:translateX(2px);}
+
+}
+
+.progress-wrap{margin-bottom:16px;}
+.progress-label{
+  display:flex;justify-content:space-between;
+  font-size:9px;color:var(--muted);margin-bottom:6px;
+  font-family:'Press Start 2P',monospace;
+}
 
 .bar{
-height:10px;background:#333;
-border-radius:10px;margin:10px 0;width:100%;
+  height:8px;background:var(--panel2);
+  border:1px solid var(--border);
+  border-radius:2px;overflow:hidden;
+}
+.fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--neon-cyan),var(--neon-pink));
+  border-radius:2px;
+  transition:width 0.4s cubic-bezier(0.4,0,0.2,1);
+  box-shadow:0 0 8px var(--neon-cyan);
 }
 
-.fill{height:100%;background:#00ffcc;}
+/* QUESTION CARD */
+.question-card{
+  border:2px solid var(--neon-cyan);
+  background:var(--panel);
+  border-radius:6px;
+  padding:24px;
+  margin-bottom:20px;
+  position:relative;
+}
+
+.q-label{
+  font-family:'Press Start 2P',monospace;
+  font-size:8px;color:var(--neon-pink);
+  letter-spacing:2px;margin-bottom:12px;
+  text-shadow:0 0 6px var(--neon-pink);
+}
+
+.q-text{
+  font-size:13px;line-height:1.8;
+  color:var(--text);letter-spacing:0.5px;
+}
+
+/* HINT BOX */
+.hint-box{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,230,0,0.05);
+  border:1px solid rgba(255,230,0,0.3);
+  border-radius:4px;padding:10px 16px;
+  margin-bottom:16px;
+  opacity:0;transition:opacity 0.5s;
+}
+.hint-box.visible{opacity:1;}
+.hint-icon{font-size:16px;}
+.hint-label{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--neon-yellow);}
+.hint-text{font-size:11px;color:var(--neon-yellow);text-shadow:0 0 6px var(--neon-yellow);}
+
+/* OPTIONS */
+.options-grid{
+  display:flex;flex-direction:column;gap:10px;
+}
+
+.opt-btn{
+  width:100%;padding:14px 20px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:4px;
+  color:var(--text);
+  font-family:'Orbitron',monospace;
+  font-size:12px;
+  cursor:pointer;
+  text-align:left;
+  display:flex;align-items:center;gap:12px;
+  transition:all 0.18s;
+  position:relative;overflow:hidden;
+}
+
+.opt-btn::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--neon-cyan);opacity:0;transition:opacity 0.2s;
+}
+
+.opt-btn:hover{
+  border-color:var(--neon-cyan);
+  background:var(--panel2);
+  box-shadow:0 0 15px rgba(0,255,245,0.15);
+}
+.opt-btn:hover::before{opacity:1;}
+.opt-btn:active{transform:scale(0.99);}
+
+.opt-letter{
+  font-family:'Press Start 2P',monospace;
+  font-size:10px;color:var(--neon-cyan);
+  width:20px;flex-shrink:0;
+}
+.opt-btn:hover .opt-letter{color:var(--neon-pink);}
 
 /* MODAL */
 .modal{
-position:fixed;
-top:0;left:0;
-width:100%;height:100%;
-background:#000c;
-display:none;
-justify-content:center;
-align-items:center;
-z-index:1000;
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.85);
+  display:none;justify-content:center;align-items:center;
+  z-index:1000;backdrop-filter:blur(4px);
 }
 
-.modal-content{
-background:#111;padding:20px;border-radius:10px;
+.modal-box{
+  background:var(--panel);
+  border-radius:8px;
+  padding:36px 32px;
+  max-width:480px;width:90%;
+  position:relative;
+  animation:modalIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
 }
 
-/* CONFETI */
-.confetti{
-position:fixed;width:10px;height:10px;
-top:0;animation:fall 2s linear;
+@keyframes modalIn{from{transform:scale(0.7);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+.modal-result{
+  font-family:'Press Start 2P',monospace;
+  font-size:20px;margin-bottom:16px;
 }
-@keyframes fall{to{transform:translateY(500px);}}
+.modal-result.correct{
+  color:var(--neon-green);
+  text-shadow:0 0 15px var(--neon-green);
+}
+.modal-result.wrong{
+  color:#ff3333;
+  text-shadow:0 0 15px #ff3333;
+}
+
+.modal-exp{
+  font-size:12px;color:var(--muted);
+  line-height:1.8;letter-spacing:0.5px;
+  margin-bottom:24px;border-top:1px solid var(--border);padding-top:16px;
+}
+
+.modal-border-correct{border:2px solid var(--neon-green);box-shadow:0 0 30px rgba(0,255,136,0.2);}
+.modal-border-wrong{border:2px solid #ff3333;box-shadow:0 0 30px rgba(255,51,51,0.2);}
+
+/* LIVES */
+.lives-display{display:flex;gap:6px;align-items:center;}
+.life{font-size:16px;transition:all 0.3s;}
+.life.lost{opacity:0.2;filter:grayscale(1);}
+
+/* CONFETTI */
+.confetti-piece{
+  position:fixed;width:8px;height:8px;top:-10px;
+  animation:confFall 2s linear forwards;
+  z-index:9998;border-radius:1px;
+}
+@keyframes confFall{
+  to{transform:translateY(110vh) rotate(720deg);}
+}
 
 /* GLITCH */
-#pistaBox{opacity:0;position:relative;font-weight:bold;}
-#pistaBox.visible{opacity:1;animation:glitch 0.5s infinite;}
-
-#pistaBox::before,#pistaBox::after{
-content:attr(data-text);
-position:absolute;left:0;
-}
-#pistaBox::before{color:#ff00ff;animation:glitchTop 0.5s infinite;}
-#pistaBox::after{color:#00ffff;animation:glitchBottom 0.5s infinite;}
-
 @keyframes glitch{
-0%{transform:skew(0);}
-50%{transform:skew(5deg);}
-100%{transform:skew(0);}
+  0%,100%{transform:skew(0);}
+  33%{transform:skew(3deg) translateX(2px);}
+  66%{transform:skew(-3deg) translateX(-2px);}
 }
-@keyframes glitchTop{50%{transform:translate(-2px,-2px);}}
-@keyframes glitchBottom{50%{transform:translate(2px,2px);}}
+.glitch{animation:glitch 0.4s infinite;}
+
+/* GAME OVER */
+.game-over{
+  font-family:'Press Start 2P',monospace;
+  font-size:clamp(18px,4vw,32px);
+  color:#ff3333;
+  text-shadow:0 0 20px #ff3333;
+  animation:pulse-logo 0.8s ease-in-out infinite;
+  margin-bottom:16px;
+}
+
+/* WORLD COMPLETE */
+.world-complete{
+  font-family:'Press Start 2P',monospace;
+  font-size:clamp(14px,3vw,24px);
+  color:var(--neon-yellow);
+  text-shadow:0 0 20px var(--neon-yellow);
+  margin-bottom:16px;
+}
+
+/* STARS */
+.stars-row{display:flex;justify-content:center;gap:8px;margin:12px 0;}
+.star{font-size:28px;animation:starPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;}
+.star:nth-child(1){animation-delay:0.1s;}
+.star:nth-child(2){animation-delay:0.25s;}
+.star:nth-child(3){animation-delay:0.4s;}
+@keyframes starPop{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+/* PIXEL DIVIDER */
+.pixel-div{
+  height:2px;
+  background:repeating-linear-gradient(90deg,var(--neon-cyan) 0,var(--neon-cyan) 6px,transparent 6px,transparent 10px);
+  opacity:0.4;margin:32px auto;max-width:300px;
+}
 </style>
 </head>
-
 <body>
 
 <!-- INICIO -->
 <div id="inicio" class="screen active">
-<h1>🎮 Game Lab</h1>
-<p><i>Es simple y eso gusta</i></p>
+  <div class="logo-wrap">
+    <div class="logo">GAME LAB</div>
+  </div>
+  <div class="tagline">▶ CONOCIMIENTO = PODER</div>
+  <div class="insert-coin">— INSERT COIN TO CONTINUE —</div>
 
-<button id="btn0" class="world-btn" onclick="irLeccion(0)">Historia</button>
+  <div class="worlds-grid">
+    <button id="btn0" class="world-btn" onclick="irLeccion(0)">
+      <div class="world-btn-inner">
+        <div class="corner corner-tl"></div>
+        <div class="corner corner-tr"></div>
+        <div class="corner corner-bl"></div>
+        <div class="corner corner-br"></div>
+        <span class="world-icon">🕹️</span>
+        <div class="world-info">
+          <span class="world-name">WORLD 1 — HISTORIA</span>
+          <span class="world-desc">Evolución de los videojuegos</span>
+        </div>
+        <span id="badge0" class="world-badge badge-open">PLAY</span>
+      </div>
+    </button>
 
-<button id="btn1" class="world-btn" onclick="irLeccion(1)">
-Géneros <span id="lock1" class="lock">🔒</span>
-</button>
+    <button id="btn1" class="world-btn locked" onclick="irLeccion(1)">
+      <div class="world-btn-inner">
+        <span class="world-icon">🎮</span>
+        <div class="world-info">
+          <span class="world-name">WORLD 2 — GÉNEROS</span>
+          <span class="world-desc">Clasificación de videojuegos</span>
+        </div>
+        <span id="badge1" class="world-badge badge-locked">🔒 LOCK</span>
+      </div>
+    </button>
 
-<button id="btn2" class="world-btn" onclick="irLeccion(2)">
-Mecánicas <span id="lock2" class="lock">🔒</span>
-</button>
+    <button id="btn2" class="world-btn locked" onclick="irLeccion(2)">
+      <div class="world-btn-inner">
+        <span class="world-icon">⚙️</span>
+        <div class="world-info">
+          <span class="world-name">WORLD 3 — MECÁNICAS</span>
+          <span class="world-desc">Funcionamiento interno</span>
+        </div>
+        <span id="badge2" class="world-badge badge-locked">🔒 LOCK</span>
+      </div>
+    </button>
+  </div>
+
+  <div class="pixel-div"></div>
+
+  <div class="highscore-panel">
+    <div class="hs-title">📊 HIGH SCORES</div>
+    <div class="hs-row"><span>MUNDO 1</span><span id="hs0" style="color:var(--neon-cyan)">---</span></div>
+    <div class="hs-row"><span>MUNDO 2</span><span id="hs1" style="color:var(--neon-cyan)">---</span></div>
+    <div class="hs-row"><span>MUNDO 3</span><span id="hs2" style="color:var(--neon-cyan)">---</span></div>
+  </div>
 </div>
 
 <!-- LECCION -->
 <div id="leccion" class="screen">
-<h2 id="tituloMundo"></h2>
-<p id="descMundo"></p>
-<button onclick="iniciarNivel()">Jugar</button>
-<button onclick="volverInicio()">Volver</button>
+  <div class="lec-header">
+    <div class="lec-world-tag">▶ SELECCIÓN DE MISIÓN</div>
+    <h2 id="tituloMundo" class="lec-title"></h2>
+    <p id="descMundo" class="lec-desc"></p>
+  </div>
+
+  <div class="lec-card">
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
+    <div class="stat-row">
+      <div class="stat-item">
+        <span class="stat-val" id="lec-pregs">6</span>
+        <span class="stat-lbl">PREGUNTAS</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val" style="color:var(--neon-pink);">3</span>
+        <span class="stat-lbl">VIDAS</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val" style="color:var(--neon-yellow);">20s</span>
+        <span class="stat-lbl">POR RONDA</span>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="iniciarNivel()">▶ INICIAR</button>
+      <button class="btn-secondary" onclick="volverInicio()">◀ VOLVER</button>
+    </div>
+  </div>
 </div>
 
 <!-- JUEGO -->
 <div id="juego" class="screen">
-<div class="hud">
-<div>Puntaje: <span id="puntaje"></span></div>
-<div>Vidas: <span id="vidas"></span></div>
-<div>Tiempo: <span id="tiempo"></span></div>
-</div>
+  <div class="hud">
+    <div class="hud-item">
+      <span class="hud-label">PUNTOS</span>
+      <span class="hud-val cyan" id="puntaje">0</span>
+    </div>
+    <div class="hud-item">
+      <span class="hud-label">VIDAS</span>
+      <div class="lives-display" id="vidas-display">
+        <span class="life" id="l0">❤️</span>
+        <span class="life" id="l1">❤️</span>
+        <span class="life" id="l2">❤️</span>
+      </div>
+    </div>
+    <div class="hud-item">
+      <span class="hud-label">TIEMPO</span>
+      <span class="hud-val yellow" id="tiempo">20</span>
+    </div>
+  </div>
 
-<div class="bar"><div id="progreso" class="fill"></div></div>
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span>PROGRESO</span>
+      <span id="prog-label">0/6</span>
+    </div>
+    <div class="bar"><div id="progreso" class="fill" style="width:0%"></div></div>
+  </div>
 
-<h3 id="pregunta"></h3>
+  <div class="question-card">
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
+    <div class="q-label">⚡ PREGUNTA <span id="q-num">01</span></div>
+    <p class="q-text" id="pregunta"></p>
+  </div>
 
-<p id="pistaBox"><b>Pista:</b> <span id="pista"></span></p>
+  <div class="hint-box" id="pistaBox">
+    <span class="hint-icon">💡</span>
+    <span class="hint-label">PISTA:</span>
+    <span class="hint-text glitch" id="pista"></span>
+  </div>
 
-<div id="opciones"></div>
+  <div class="options-grid" id="opciones"></div>
 </div>
 
 <!-- MODAL -->
 <div id="modal" class="modal">
-<div class="modal-content">
-<h2 id="resultado"></h2>
-<p id="explicacion"></p>
-<button onclick="siguiente()">Continuar</button>
-</div>
+  <div class="modal-box" id="modalBox">
+    <div id="modal-icon" style="font-size:40px;margin-bottom:12px;"></div>
+    <div id="resultado" class="modal-result"></div>
+    <div class="stars-row" id="stars-row"></div>
+    <p id="explicacion" class="modal-exp"></p>
+    <button class="btn-primary" onclick="siguiente()" style="width:100%">▶ CONTINUAR</button>
+  </div>
 </div>
 
 <script>
 let progreso=[true,false,false];
+let highscores=[null,null,null];
 
-/* MUNDOS COMPLETOS */
 let mundos=[
-{
-nombre:"Historia",
-desc:"Evolución de los videojuegos",
-niveles:[
-{q:"¿Qué videojuego marcó el inicio comercial de la industria arcade con una mecánica simple de simulación deportiva?",hint:"Pong",
-op:["Pong, un simulador de tenis de mesa electrónico","Fortnite, un battle royale moderno","Minecraft, un sandbox creativo"],c:0,exp:"Pong fue uno de los primeros éxitos comerciales."},
-{q:"¿Qué limitación principal tenían los videojuegos en los años 70 y 80 debido al hardware?",hint:"potencia",
-op:["Baja capacidad de procesamiento y memoria","Exceso de conectividad en red","Sobrecarga de controles avanzados"],c:0,exp:"El hardware era muy limitado."},
-{q:"¿Qué consola revitalizó la industria tras la crisis de 1983?",hint:"NES",
-op:["Nintendo Entertainment System","PlayStation 5","Xbox Series X"],c:0,exp:"Nintendo reactivó el mercado."},
-{q:"¿Qué avance permitió la transición a videojuegos en 3D?",hint:"GPU",
-op:["Procesadores gráficos especializados","Discos compactos únicamente","Reducción de píxeles"],c:0,exp:"Las GPU hicieron posible el 3D."},
-{q:"¿Qué impacto tuvo internet en los videojuegos?",hint:"online",
-op:["Multijugador global en tiempo real","Eliminación de gráficos","Reducción de contenido"],c:0,exp:"Permitió jugar con personas en todo el mundo."},
-{q:"¿Qué plataforma impulsó la masificación del gaming en el siglo XXI?",hint:"móvil",
-op:["Dispositivos móviles accesibles","Consolas exclusivas","Arcades físicos"],c:0,exp:"Los móviles expandieron el acceso."}
-]
-},
-{
-nombre:"Géneros",
-desc:"Clasificación de videojuegos",
-niveles:[
-{q:"¿Qué característica define a un FPS moderno?",hint:"disparo",
-op:["Uso de armas desde perspectiva en primera persona","Construcción de mundos abiertos","Resolución de acertijos"],c:0,exp:"FPS significa First Person Shooter."},
-{q:"¿Qué define a un RPG?",hint:"rol",
-op:["Desarrollo progresivo de personaje y narrativa","Carreras competitivas","Simulación deportiva"],c:0,exp:"RPG = Role Playing Game."},
-{q:"¿Qué es un sandbox?",hint:"libertad",
-op:["Exploración y creación sin objetivos estrictos","Historia lineal fija","Combate obligatorio"],c:0,exp:"Permite libertad total."},
-{q:"¿Qué define un MOBA?",hint:"equipo",
-op:["Estrategia en equipo en mapas definidos","Juego individual","Carreras rápidas"],c:0,exp:"Trabajo en equipo."},
-{q:"¿Qué caracteriza a los juegos puzzle?",hint:"lógica",
-op:["Resolución de problemas y acertijos","Acción constante","Combate"],c:0,exp:"Se basan en lógica."},
-{q:"¿Qué define la simulación?",hint:"realismo",
-op:["Imitar sistemas reales con precisión","Crear fantasía extrema","Eliminar reglas"],c:0,exp:"Busca realismo."}
-]
-},
-{
-nombre:"Mecánicas",
-desc:"Funcionamiento interno",
-niveles:[
-{q:"¿Qué representan las vidas en un videojuego?",hint:"intentos",
-op:["Cantidad de oportunidades antes de perder","Tiempo restante","Nivel alcanzado"],c:0,exp:"Intentos del jugador."},
-{q:"¿Qué indica una barra de progreso?",hint:"avance",
-op:["Estado de avance dentro del nivel","Decoración visual","Nivel de sonido"],c:0,exp:"Mide progreso."},
-{q:"¿Qué significa subir de nivel?",hint:"nivel",
-op:["Mejorar habilidades del personaje","Reiniciar partida","Perder progreso"],c:0,exp:"Progresión."},
-{q:"¿Qué es un checkpoint?",hint:"guardar",
-op:["Punto de guardado intermedio","Inicio del juego","Final del juego"],c:0,exp:"Permite continuar."},
-{q:"¿Qué es cooldown?",hint:"espera",
-op:["Tiempo de recarga de habilidades","Fin del juego","Velocidad extra"],c:0,exp:"Tiempo de espera."},
-{q:"¿Qué es el HUD?",hint:"interfaz",
-op:["Interfaz gráfica informativa","Historia narrativa","Sistema de audio"],c:0,exp:"Interfaz visual."}
-]
-}
+  {
+    nombre:"Historia",
+    desc:"Evolución de los videojuegos",
+    niveles:[
+      {q:"¿Qué videojuego marcó el inicio comercial de la industria arcade con una mecánica simple de simulación deportiva?",hint:"Pong",op:["Pong, un simulador de tenis de mesa electrónico","Fortnite, un battle royale moderno","Minecraft, un sandbox creativo"],c:0,exp:"Pong fue uno de los primeros éxitos comerciales de la historia del videojuego."},
+      {q:"¿Qué limitación principal tenían los videojuegos en los años 70 y 80 debido al hardware?",hint:"potencia",op:["Baja capacidad de procesamiento y memoria","Exceso de conectividad en red","Sobrecarga de controles avanzados"],c:0,exp:"El hardware era muy limitado en memoria y velocidad de cómputo."},
+      {q:"¿Qué consola revitalizó la industria tras la crisis de 1983?",hint:"NES",op:["Nintendo Entertainment System","PlayStation 5","Xbox Series X"],c:0,exp:"Nintendo reactivó el mercado con el NES y controles de calidad estricto."},
+      {q:"¿Qué avance permitió la transición a videojuegos en 3D?",hint:"GPU",op:["Procesadores gráficos especializados","Discos compactos únicamente","Reducción de píxeles"],c:0,exp:"Las GPU hicieron posible el renderizado en 3D en tiempo real."},
+      {q:"¿Qué impacto tuvo internet en los videojuegos?",hint:"online",op:["Multijugador global en tiempo real","Eliminación de gráficos","Reducción de contenido"],c:0,exp:"Permitió jugar con personas en todo el mundo simultáneamente."},
+      {q:"¿Qué plataforma impulsó la masificación del gaming en el siglo XXI?",hint:"móvil",op:["Dispositivos móviles accesibles","Consolas exclusivas","Arcades físicos"],c:0,exp:"Los móviles expandieron el acceso al gaming a millones de personas."}
+    ]
+  },
+  {
+    nombre:"Géneros",
+    desc:"Clasificación de videojuegos",
+    niveles:[
+      {q:"¿Qué característica define a un FPS moderno?",hint:"disparo",op:["Uso de armas desde perspectiva en primera persona","Construcción de mundos abiertos","Resolución de acertijos"],c:0,exp:"FPS = First Person Shooter. La perspectiva en primera persona es su sello."},
+      {q:"¿Qué define a un RPG?",hint:"rol",op:["Desarrollo progresivo de personaje y narrativa","Carreras competitivas","Simulación deportiva"],c:0,exp:"RPG = Role Playing Game. El jugador asume un rol y progresa."},
+      {q:"¿Qué es un sandbox?",hint:"libertad",op:["Exploración y creación sin objetivos estrictos","Historia lineal fija","Combate obligatorio"],c:0,exp:"El sandbox ofrece libertad total para explorar y crear."},
+      {q:"¿Qué define un MOBA?",hint:"equipo",op:["Estrategia en equipo en mapas definidos","Juego individual","Carreras rápidas"],c:0,exp:"MOBA = Multiplayer Online Battle Arena. El trabajo en equipo es clave."},
+      {q:"¿Qué caracteriza a los juegos puzzle?",hint:"lógica",op:["Resolución de problemas y acertijos","Acción constante","Combate"],c:0,exp:"Los puzzles se basan en lógica y resolución de problemas."},
+      {q:"¿Qué define la simulación?",hint:"realismo",op:["Imitar sistemas reales con precisión","Crear fantasía extrema","Eliminar reglas"],c:0,exp:"Los simuladores buscan replicar situaciones del mundo real."}
+    ]
+  },
+  {
+    nombre:"Mecánicas",
+    desc:"Funcionamiento interno",
+    niveles:[
+      {q:"¿Qué representan las vidas en un videojuego?",hint:"intentos",op:["Cantidad de oportunidades antes de perder","Tiempo restante","Nivel alcanzado"],c:0,exp:"Las vidas definen cuántos intentos tiene el jugador antes del game over."},
+      {q:"¿Qué indica una barra de progreso?",hint:"avance",op:["Estado de avance dentro del nivel","Decoración visual","Nivel de sonido"],c:0,exp:"La barra de progreso mide cuánto has avanzado en el nivel."},
+      {q:"¿Qué significa subir de nivel?",hint:"nivel",op:["Mejorar habilidades del personaje","Reiniciar partida","Perder progreso"],c:0,exp:"Subir de nivel representa la progresión y mejora del personaje."},
+      {q:"¿Qué es un checkpoint?",hint:"guardar",op:["Punto de guardado intermedio","Inicio del juego","Final del juego"],c:0,exp:"Un checkpoint permite continuar desde un punto sin reiniciar todo."},
+      {q:"¿Qué es cooldown?",hint:"espera",op:["Tiempo de recarga de habilidades","Fin del juego","Velocidad extra"],c:0,exp:"El cooldown es el tiempo de espera antes de usar una habilidad de nuevo."},
+      {q:"¿Qué es el HUD?",hint:"interfaz",op:["Interfaz gráfica informativa","Historia narrativa","Sistema de audio"],c:0,exp:"HUD = Heads-Up Display. Es la interfaz visual que muestra info al jugador."}
+    ]
+  }
 ];
 
-let mundoActual=0,nivelActual=0,puntaje=0,vidas=3,tiempo=20,timer;
+let mundoActual=0,nivelActual=0,puntajeActual=0,vidas=3,tiempo=20,timer;
+const letras=["A","B","C"];
 
-/* BLOQUEO */
 function actualizarBloqueo(){
-document.getElementById("lock1").style.display = progreso[1] ? "none" : "block";
-document.getElementById("lock2").style.display = progreso[2] ? "none" : "block";
+  for(let i=0;i<3;i++){
+    const btn=document.getElementById("btn"+i);
+    const badge=document.getElementById("badge"+i);
+    if(progreso[i]){
+      btn.classList.remove("locked");
+      if(highscores[i]!==null){
+        badge.className="world-badge badge-done";
+        badge.textContent="★ "+highscores[i]+"pts";
+      }else{
+        badge.className="world-badge badge-open";
+        badge.textContent="PLAY";
+      }
+    }else{
+      btn.classList.add("locked");
+      badge.className="world-badge badge-locked";
+      badge.textContent="🔒 LOCK";
+    }
+    const hs=document.getElementById("hs"+i);
+    hs.textContent=highscores[i]!==null?highscores[i]+" pts":"---";
+  }
 }
 
-/* NAV */
 function mostrar(id){
-document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
-if(id==="inicio") actualizarBloqueo();
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if(id==="inicio") actualizarBloqueo();
 }
 
-function volverInicio(){mostrar("inicio");}
+function volverInicio(){clearInterval(timer);mostrar("inicio");}
 
 function irLeccion(i){
-if(!progreso[i]){
-alert("Debes completar el mundo anterior");
-return;
+  if(!progreso[i]){
+    flashLocked(i);return;
+  }
+  mundoActual=i;
+  document.getElementById("tituloMundo").textContent="WORLD "+(i+1)+" — "+mundos[i].nombre.toUpperCase();
+  document.getElementById("descMundo").textContent=mundos[i].desc;
+  document.getElementById("lec-pregs").textContent=mundos[i].niveles.length;
+  mostrar("leccion");
 }
-mundoActual=i;
-document.getElementById("tituloMundo").innerText=mundos[i].nombre;
-document.getElementById("descMundo").innerText=mundos[i].desc;
-mostrar("leccion");
+
+function flashLocked(i){
+  const btn=document.getElementById("btn"+i);
+  btn.style.transition="none";
+  btn.style.transform="translateX(-6px)";
+  setTimeout(()=>{btn.style.transform="translateX(6px)";},80);
+  setTimeout(()=>{btn.style.transform="translateX(-4px)";},160);
+  setTimeout(()=>{btn.style.transform="";},240);
 }
 
 function iniciarNivel(){
-nivelActual=0;puntaje=0;vidas=3;
-mostrar("juego");cargarNivel();
+  nivelActual=0;puntajeActual=0;vidas=3;
+  actualizarVidas();
+  mostrar("juego");
+  cargarNivel();
 }
 
-/* JUEGO */
+function actualizarVidas(){
+  for(let i=0;i<3;i++){
+    document.getElementById("l"+i).classList.toggle("lost",i>=vidas);
+  }
+}
+
 function cargarNivel(){
-let n=mundos[mundoActual].niveles[nivelActual];
+  const n=mundos[mundoActual].niveles[nivelActual];
+  const total=mundos[mundoActual].niveles.length;
 
-document.getElementById("pregunta").innerText=n.q;
-document.getElementById("pista").innerText=n.hint;
+  document.getElementById("pregunta").textContent=n.q;
+  document.getElementById("pista").textContent=n.hint;
+  document.getElementById("q-num").textContent=String(nivelActual+1).padStart(2,"0");
+  document.getElementById("puntaje").textContent=puntajeActual;
 
-let box=document.getElementById("pistaBox");
-box.setAttribute("data-text","Pista: "+n.hint);
-box.classList.remove("visible");
+  const pct=Math.round((nivelActual/total)*100);
+  document.getElementById("progreso").style.width=pct+"%";
+  document.getElementById("prog-label").textContent=nivelActual+"/"+total;
 
-let html="";
-n.op.forEach((o,i)=>html+=`<button onclick="responder(${i})">${o}</button>`);
-document.getElementById("opciones").innerHTML=html;
+  document.getElementById("pistaBox").classList.remove("visible");
 
-tiempo=20;
-document.getElementById("tiempo").innerText=tiempo;
+  const indices=[0,1,2].sort(()=>Math.random()-0.5);
+  const correctaShuffled=indices.indexOf(n.c);
+  const html=indices.map((oi,pos)=>`
+    <button class="opt-btn" onclick="responder(${pos},${correctaShuffled})">
+      <span class="opt-letter">${letras[pos]}</span>
+      <span>${n.op[oi]}</span>
+    </button>`).join("");
+  document.getElementById("opciones").innerHTML=html;
 
-clearInterval(timer);
-timer=setInterval(()=>{
-tiempo--;
-document.getElementById("tiempo").innerText=tiempo;
-
-if(tiempo===10) box.classList.add("visible");
-
-if(tiempo<=0){
-vidas--;
-clearInterval(timer);
-mostrarResultado(false,"Tiempo agotado");
-}
-},1000);
-}
-
-function responder(i){
-clearInterval(timer);
-let n=mundos[mundoActual].niveles[nivelActual];
-
-if(i===n.c){
-puntaje+=10;
-confeti();
-mostrarResultado(true,n.exp);
-}else{
-vidas--;
-mostrarResultado(false,n.exp);
-}
+  tiempo=20;
+  actualizarTiempo();
+  clearInterval(timer);
+  timer=setInterval(()=>{
+    tiempo--;
+    actualizarTiempo();
+    if(tiempo===10) document.getElementById("pistaBox").classList.add("visible");
+    if(tiempo<=0){
+      clearInterval(timer);
+      vidas--;actualizarVidas();
+      if(vidas<=0) mostrarGameOver();
+      else mostrarResultado(false,"⏱ Tiempo agotado");
+    }
+  },1000);
 }
 
-function mostrarResultado(ok,texto){
-document.getElementById("resultado").innerText=ok?"Correcto":"Incorrecto";
-document.getElementById("explicacion").innerText=texto;
-document.getElementById("modal").style.display="flex";
+function actualizarTiempo(){
+  const el=document.getElementById("tiempo");
+  el.textContent=tiempo;
+  el.className="hud-val yellow";
+  if(tiempo<=5) el.className="hud-val danger";
+  else if(tiempo<=10) el.className="hud-val pink";
+}
+
+function responder(i,correcta){
+  clearInterval(timer);
+  const n=mundos[mundoActual].niveles[nivelActual];
+  const btns=document.querySelectorAll(".opt-btn");
+
+  btns[i].style.borderColor=i===correcta?"var(--neon-green)":"#ff3333";
+  btns[i].style.background=i===correcta?"rgba(0,255,136,0.1)":"rgba(255,51,51,0.1)";
+  if(i!==correcta) btns[correcta].style.borderColor="var(--neon-green)";
+
+  btns.forEach(b=>b.style.pointerEvents="none");
+
+  setTimeout(()=>{
+    if(i===correcta){
+      const bonus=Math.floor(tiempo/20*10)+10;
+      puntajeActual+=bonus;
+      lanzarConfeti();
+      mostrarResultado(true,n.exp,true);
+    }else{
+      vidas--;actualizarVidas();
+      if(vidas<=0) mostrarGameOver();
+      else mostrarResultado(false,n.exp,false);
+    }
+  },400);
+}
+
+function mostrarResultado(ok,texto,correcto){
+  const box=document.getElementById("modalBox");
+  box.className="modal-box "+(ok?"modal-border-correct":"modal-border-wrong");
+  document.getElementById("modal-icon").textContent=ok?"🏆":"💀";
+  const res=document.getElementById("resultado");
+  res.className="modal-result "+(ok?"correct":"wrong");
+  res.textContent=ok?"¡CORRECTO!":"INCORRECTO";
+  document.getElementById("explicacion").textContent=texto;
+
+  const stars=document.getElementById("stars-row");
+  if(ok){
+    const s=tiempo>=15?"⭐⭐⭐":tiempo>=8?"⭐⭐":"⭐";
+    stars.innerHTML=s.split("").map(c=>`<span class="star">${c}</span>`).join("");
+  }else{
+    stars.innerHTML="";
+  }
+  document.getElementById("modal").style.display="flex";
+}
+
+function mostrarGameOver(){
+  const box=document.getElementById("modalBox");
+  box.className="modal-box modal-border-wrong";
+  document.getElementById("modal-icon").textContent="💀";
+  const res=document.getElementById("resultado");
+  res.className="modal-result wrong";
+  res.innerHTML='<div class="game-over">GAME OVER</div>';
+  document.getElementById("explicacion").textContent="Sin vidas. El mundo te ha vencido esta vez...";
+  document.getElementById("stars-row").innerHTML="";
+
+  const btn=document.querySelector("#modal .btn-primary");
+  btn.textContent="▶ REINTENTAR";
+  btn.onclick=()=>{
+    document.getElementById("modal").style.display="none";
+    btn.textContent="▶ CONTINUAR";
+    btn.onclick=siguiente;
+    volverInicio();
+  };
+  document.getElementById("modal").style.display="flex";
 }
 
 function siguiente(){
-document.getElementById("modal").style.display="none";
-nivelActual++;
+  document.getElementById("modal").style.display="none";
+  nivelActual++;
+  const total=mundos[mundoActual].niveles.length;
 
-if(nivelActual>=mundos[mundoActual].niveles.length){
-if(mundoActual+1<progreso.length){
-progreso[mundoActual+1]=true;
-}
-volverInicio();
-}else{
-cargarNivel();
-}
-}
-
-function confeti(){
-for(let i=0;i<20;i++){
-let c=document.createElement("div");
-c.className="confetti";
-c.style.left=Math.random()*100+"%";
-c.style.background=["red","yellow","blue","green"][Math.floor(Math.random()*4)];
-document.body.appendChild(c);
-setTimeout(()=>c.remove(),2000);
-}
+  if(nivelActual>=total){
+    if(highscores[mundoActual]===null||puntajeActual>highscores[mundoActual]){
+      highscores[mundoActual]=puntajeActual;
+    }
+    if(mundoActual+1<progreso.length) progreso[mundoActual+1]=true;
+    mostrarWorldComplete();
+  }else{
+    document.getElementById("puntaje").textContent=puntajeActual;
+    cargarNivel();
+  }
 }
 
-/* INIT */
+function mostrarWorldComplete(){
+  const box=document.getElementById("modalBox");
+  box.className="modal-box modal-border-correct";
+  document.getElementById("modal-icon").textContent="🎉";
+  const res=document.getElementById("resultado");
+  res.className="modal-result correct";
+  res.innerHTML='<div class="world-complete">WORLD CLEAR!</div>';
+  document.getElementById("stars-row").innerHTML=
+    '<span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span>';
+  document.getElementById("explicacion").textContent=
+    "Puntuación final: "+puntajeActual+" pts. ¡Mundo desbloqueado!";
+
+  const btn=document.querySelector("#modal .btn-primary");
+  btn.textContent="▶ AL MAPA";
+  btn.onclick=()=>{
+    document.getElementById("modal").style.display="none";
+    btn.textContent="▶ CONTINUAR";
+    btn.onclick=siguiente;
+    lanzarConfeti();
+    volverInicio();
+  };
+  document.getElementById("modal").style.display="flex";
+  lanzarConfeti();
+}
+
+function lanzarConfeti(){
+  const cols=["#00fff5","#ff00aa","#ffe600","#00ff88","#ff6b00","#ffffff"];
+  for(let i=0;i<35;i++){
+    const c=document.createElement("div");
+    c.className="confetti-piece";
+    c.style.left=Math.random()*100+"%";
+    c.style.background=cols[Math.floor(Math.random()*cols.length)];
+    c.style.animationDelay=Math.random()*0.8+"s";
+    c.style.animationDuration=(1.5+Math.random()*1)+"s";
+    c.style.width=c.style.height=(6+Math.random()*8)+"px";
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),2800);
+  }
+}
+
 actualizarBloqueo();
 </script>
 
- <script
-  src='https://cdn.jotfor.ms/agent/embedjs/019e038d7989770289b91e5819339608272d/embed.js'>
+<script
+  src='https://cdn.jotfor.ms/agent/embedjs/019e038d7989770289b91e5819339608272d/embed.js?autoOpenChatIn=1'>
 </script>
  
 </body>
-  
 </html>
